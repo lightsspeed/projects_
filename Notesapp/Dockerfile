@@ -4,7 +4,7 @@ FROM nginx:alpine
 # Set working directory
 WORKDIR /usr/share/nginx/html
 
-# Copy application files
+# Copy all necessary files
 COPY index.html .
 COPY script.js .
 COPY style.css .
@@ -15,10 +15,13 @@ COPY images/notes.png images/
 COPY images/edit.png images/
 COPY images/delete.png images/
 
-# Optional: Create a custom nginx configuration to support single-page application routing
+# Create custom nginx configuration to ensure proper file serving
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
+# Verify file copying
+RUN ls -la
+
+# Expose port
 EXPOSE 80
 
-# No need for CMD as nginx:alpine image already has default CMD to start nginx
+# Default CMD from nginx image will start nginx
