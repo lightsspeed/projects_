@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Replacer Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="theme-switch-wrapper">
+            <span class="toggle-icons">
+                <span>☀️</span>
+                <span>🌙</span>
+            </span>
+            <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox" />
+                <div class="slider"></div>
+            </label>
+        </div>
+        
+        <h1>Word Replacer Tool</h1>
+        
+        <div>
+            <label for="sentence">Enter a sentence:</label>
+            <textarea id="sentence" rows="3" placeholder="Enter your sentence here..."></textarea>
+            
+            <label for="wordToReplace">Word to replace:</label>
+            <input type="text" id="wordToReplace" placeholder="Enter word to replace">
+            
+            <label for="replacementWord">Replacement word:</label>
+            <input type="text" id="replacementWord" placeholder="Enter replacement word">
+            
+            <button onclick="replaceWord()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                </svg>
+                Replace Word
+            </button>
+        </div>
+        
+        <div class="result" id="result">
+            <p>The modified sentence will appear here after replacement.</p>
+        </div>
+        
+        <div class="example">
+            <h3>Example sentences (click to use):</h3>
+            <div class="example-text" onclick="useExample(this)">give me detailed syllabus for preparation of linux for my devops interview and my overall development of linux</div>
+            <div class="example-text" onclick="useExample(this)">give me 10 question each for Linux (Topic) in easy medium hard which test my theoritical, handson, scenario based knowledge and debugging skills. dont repeat the questions</div>
+            <div class="example-text" onclick="useExample(this)">give me debugging scenario for pods and also its solutions as i am preparing for interview and CKA</div>
+            <div class="example-text" onclick="useExample(this)">just list down pod debugging scenario for pods</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
