@@ -32,8 +32,4 @@ jobs:
       - name: Push Image to Docker Hub
         run: docker push $IMAGE_NAME
 
-      - name: Cleanup Docker Containers
-        run: |
-          docker stop my-app-container
-          docker rm my-app-container
-          docker rmi $IMAGE_NAME
+     
