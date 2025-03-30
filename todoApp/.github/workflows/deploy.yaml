@@ -1,0 +1,39 @@
+name: Build, Run & Push Docker Image
+
+on:
+  push:
+    branches:
+      - main  # Runs when code is pushed to the main branch
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Set Image Name and Tag
+        run: echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/my-app:latest" >> $GITHUB_ENV
+
+      - name: Build Docker Image
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Run Docker Container
+        run: docker run -d --name my-app-container -p 8080:80 $IMAGE_NAME
+
+      - name: Verify Running Container
+        run: docker ps -a
+
+      - name: Push Image to Docker Hub
+        run: docker push $IMAGE_NAME
+
+      - name: Cleanup Docker Containers
+        run: |
+          docker stop my-app-container
+          docker rm my-app-container
+          docker rmi $IMAGE_NAME
