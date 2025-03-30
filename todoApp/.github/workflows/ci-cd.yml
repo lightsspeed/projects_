@@ -1,27 +1,20 @@
-name: Build and Push to Docker Hub
-
+name: deploy on docker
 on:
   push:
     branches:
       - main
-
+  pull_request:
+    branches:
+      - main
+  
 jobs:
-  build-and-push:
+  publish_images:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push Docker image
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: build image
+        run: docker build ./src/ -t lightsspeed/todoapp:1.0.0
+      - name: Docker Push
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/todoapp:${{ github.sha }} .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/todoapp:${{ github.sha }}
+          docker push lightsspeed/todoapp:1.0.0
