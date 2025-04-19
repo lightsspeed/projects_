@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline Runner: Code to Cloud</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-wrapper">
+        <header>
+            <h1>Pipeline Runner: Code to Cloud</h1>
+            <p class="subtitle">Deploy your code, dodge the bugs!</p>
+        </header>
+
+        <div class="game-stats">
+            <div class="stat">
+                <span class="stat-label">Score:</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Health:</span>
+                <span class="stat-value" id="health">100%</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Stage:</span>
+                <span class="stat-value" id="stage">Code</span>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <canvas id="game-canvas"></canvas>
+        </div>
+
+        <div class="controls">
+            <button id="start-btn">Start Game</button>
+            <button id="how-to-play-btn">How to Play</button>
+        </div>
+
+        <!-- How to Play Modal -->
+        <div class="modal" id="how-to-play-modal">
+            <div class="modal-content">
+                <h2>How to Play</h2>
+                <ul>
+                    <li>Press Space or Up Arrow to jump.</li>
+                    <li>Dodge bugs, failed builds, and unit tests.</li>
+                    <li>Collect power-ups like CI Boost and Unit Test Shield.</li>
+                    <li>Reach the Deploy stage to earn bonus points.</li>
+                    <li>Survive as long as you can to get a high score!</li>
+                </ul>
+                <button id="close-how-to-play-btn">Got It!</button>
+            </div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div class="modal" id="game-over-modal">
+            <div class="modal-content">
+                <h2>Pipeline Failure!</h2>
+                <p id="game-over-message"></p>
+                <p>Final Score: <span id="final-score"></span></p>
+                <button id="restart-btn">Try Again</button>
+                <button id="share-btn">Share Score</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

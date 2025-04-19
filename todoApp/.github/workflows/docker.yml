@@ -18,10 +18,10 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Set Image Name and Tag
-        run: echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/my-app:latest" >> $GITHUB_ENV
+        run: echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/todoapp:1.0.0" >> $GITHUB_ENV
 
       - name: Build Docker Image
-        run: docker build -t $IMAGE_NAME -f ./todoApp/Dockerfile
+        run: docker build -t $IMAGE_NAME -f todoApp/Dockerfile todoApp/
 
       - name: Run Docker Container
         run: docker run -d --name my-app-container -p 8080:80 $IMAGE_NAME

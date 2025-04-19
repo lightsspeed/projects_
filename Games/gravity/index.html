@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravity Glitch</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <header>
+            <h1>Gravity Glitch</h1>
+            <p class="subtitle">Flip gravity and escape the glitchy maze!</p>
+        </header>
+
+        <div class="game-stats">
+            <div class="stat">
+                <span class="stat-label">Level:</span>
+                <span class="stat-value" id="level">1</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Moves:</span>
+                <span class="stat-value" id="moves">0</span>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <canvas id="game-canvas"></canvas>
+        </div>
+
+        <div class="controls">
+            <button id="start-btn">Start Game</button>
+            <button id="how-to-play-btn">How to Play</button>
+        </div>
+
+        <!-- How to Play Modal -->
+        <div class="modal" id="how-to-play-modal">
+            <div class="modal-content">
+                <h2>How to Play</h2>
+                <ul>
+                    <li>Use arrow keys to move left/right and jump.</li>
+                    <li>Press Space to flip gravity (up/down).</li>
+                    <li>Enter portals to teleport to the paired portal.</li>
+                    <li>Avoid spikes and glitch zones—they'll reset you!</li>
+                    <li>Reach the exit to complete the level.</li>
+                </ul>
+                <button id="close-how-to-play-btn">Got It!</button>
+            </div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div class="modal" id="game-over-modal">
+            <div class="modal-content">
+                <h2>Game Over!</h2>
+                <p>You got caught in a glitch!</p>
+                <p>Level Reached: <span id="final-level"></span></p>
+                <button id="restart-btn">Try Again</button>
+            </div>
+        </div>
+
+        <!-- Level Complete Modal -->
+        <div class="modal" id="level-complete-modal">
+            <div class="modal-content">
+                <h2>Level Complete!</h2>
+                <p>Moves Used: <span id="moves-used"></span></p>
+                <p>Next Level: <span id="next-level"></span></p>
+                <button id="next-level-btn">Next Level</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

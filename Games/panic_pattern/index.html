@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Panic</title>
+    <style>
+        :root {
+            --primary-color: #3a86ff;
+            --secondary-color: #ff006e;
+            --accent-color: #8338ec;
+            --bg-color: #141414;
+            --tile-bg: #2a2a2a;
+            --tile-revealed: #3a3a3a;
+            --text-color: #ffffff;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .cell {
+            aspect-ratio: 1;
+            background-color: var(--tile-bg);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell:active {
+            transform: scale(0.95);
+        }
+        
+        .cell.revealed {
+            background-color: var(--tile-revealed);
+            box-shadow: none;
+        }
+        
+        .cell.flagged::before {
+            content: "🚩";
+        }
+        
+        .cell.pattern-a {
+            background: linear-gradient(135deg, #ff9500, #ff006e);
+        }
+        
+        .cell.pattern-b {
+            background: linear-gradient(135deg, #3a86ff, #8338ec);
+        }
+        
+        .cell.pattern-c {
+            background: linear-gradient(135deg, #06d6a0, #118ab2);
+        }
+
+        .cell.pattern-d {
+            background: linear-gradient(135deg, #ffd166, #ef476f);
+        }
+        
+        .cell.pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .cell.completed {
+            animation: completed 0.8s ease-in-out;
+        }
+        
+        @keyframes completed {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); filter: brightness(1.5); }
+            100% { transform: scale(1); }
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2a75e0;
+        }
+        
+        button.secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        button.secondary:hover {
+            background-color: #d80059;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .modal-content {
+            background-color: #222;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 80%;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal h2 {
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .how-to-play {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .how-to-play h3 {
+            margin-bottom: 10px;
+        }
+        
+        .how-to-play ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .how-to-play li {
+            margin-bottom: 8px;
+        }
+        
+        .timer-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            max-width: 500px;
+        }
+        
+        .timer-progress {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transform-origin: left;
+            transition: transform 0.1s linear;
+        }
+        
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .game-stats, .controls {
+                max-width: 100%;
+            }
+            
+            .stat-value {
+                font-size: 1rem;
+            }
+            
+            .cell {
+                font-size: 0.9rem;
+            }
+            
+            button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Difficulty selector */
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .difficulty-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .difficulty-btn.active {
+            background-color: var(--primary-color);
+        }
+
+        /* Pattern indicator */
+        .patterns-remaining {
+            margin-bottom: 15px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .pattern-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .pattern-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            transition: opacity 0.3s ease;
+        }
+
+        .pattern-indicator.completed {
+            opacity: 0.3;
+        }
+
+        .pattern-a-indicator {
+            background: linear-gradient(135deg, #ff9500, #ff006e);
+        }
+        
+        .pattern-b-indicator {
+            background: linear-gradient(135deg, #3a86ff, #8338ec);
+        }
+        
+        .pattern-c-indicator {
+            background: linear-gradient(135deg, #06d6a0, #118ab2);
+        }
+
+        .pattern-d-indicator {
+            background: linear-gradient(135deg, #ffd166, #ef476f);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Pattern Panic</h1>
+        <p class="subtitle">Find and complete the hidden patterns before they detonate!</p>
+    </header>
+
+    <div class="difficulty-selector">
+        <div class="difficulty-btn active" data-difficulty="easy">Easy</div>
+        <div class="difficulty-btn" data-difficulty="medium">Medium</div>
+        <div class="difficulty-btn" data-difficulty="hard">Hard</div>
+    </div>
+
+    <div class="patterns-remaining">
+        <div>Patterns Remaining:</div>
+        <div class="pattern-indicators" id="pattern-indicators"></div>
+    </div>
+
+    <div class="timer-bar">
+        <div class="timer-progress" id="timer-progress"></div>
+    </div>
+
+    <div class="game-stats">
+        <div class="stat">
+            <div class="stat-value" id="score">0</div>
+            <div class="stat-label">Score</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="level">1</div>
+            <div class="stat-label">Level</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="time">30</div>
+            <div class="stat-label">Time</div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="game-board" id="game-board"></div>
+    </div>
+
+    <div class="controls">
+        <button id="new-game-btn">New Game</button>
+        <button id="help-btn" class="secondary">How to Play</button>
+    </div>
+
+    <div class="modal" id="start-modal">
+        <div class="modal-content">
+            <h2>Welcome to Pattern Panic!</h2>
+            <p>Find and complete hidden patterns before they destabilize and spread across the board.</p>
+            
+            <div class="how-to-play">
+                <h3>How to Play:</h3>
+                <ul>
+                    <li>Click cells to reveal what's underneath</li>
+                    <li>Numbers indicate how many pattern pieces are adjacent</li>
+                    <li>Right-click to flag potential pattern cells</li>
+                    <li>Connect all cells of a pattern to complete it</li>
+                    <li>Complete all patterns before time runs out!</li>
+                </ul>
+            </div>
+            
+            <button id="start-game-btn">Start Game</button>
+        </div>
+    </div>
+
+    <div class="modal" id="game-over-modal">
+        <div class="modal-content">
+            <h2>Game Over!</h2>
+            <p>The patterns destabilized and spread chaos across the board.</p>
+            <div id="final-stats">
+                <div>Final Score: <span id="final-score">0</span></div>
+                <div>Level Reached: <span id="final-level">1</span></div>
+            </div>
+            <button id="restart-btn">Play Again</button>
+        </div>
+    </div>
+
+    <div class="modal" id="level-complete-modal">
+        <div class="modal-content">
+            <h2>Level Complete!</h2>
+            <p>You successfully contained all the patterns!</p>
+            <div id="level-stats">
+                <div>Score: <span id="level-score">0</span></div>
+                <div>Next Level: <span id="next-level">2</span></div>
+            </div>
+            <button id="next-level-btn">Next Level</button>
+        </div>
+    </div>
+
+    <div class="modal" id="help-modal">
+        <div class="modal-content">
+            <h2>How to Play</h2>
+            <div class="how-to-play">
+                <h3>Basics:</h3>
+                <ul>
+                    <li>The board contains hidden pattern fragments</li>
+                    <li>Click to reveal cells</li>
+                    <li>Numbers show how many pattern cells are adjacent</li>
+                    <li>Right-click to flag cells you think contain patterns</li>
+                </ul>
+                
+                <h3>Patterns:</h3>
+                <ul>
+                    <li>Each pattern has a unique color gradient</li>
+                    <li>All cells of a pattern must be connected (horizontally, vertically, or diagonally)</li>
+                    <li>Complete a pattern by revealing all its cells</li>
+                    <li>If time runs out, incomplete patterns will destabilize and spread!</li>
+                </ul>
+                
+                <h3>Tips:</h3>
+                <ul>
+                    <li>Use numbers as hints to locate pattern cells</li>
+                    <li>Patterns never overlap with each other</li>
+                    <li>Higher levels have more complex patterns</li>
+                </ul>
+            </div>
+            
+            <button id="close-help-btn">Got it!</button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let board = [];
+        let boardSize = 10;
+        let difficulty = 'easy';
+        let numPatterns = 4;
+        let patternSizes = {
+            'easy': { min: 3, max: 5 },
+            'medium': { min: 4, max: 7 },
+            'hard': { min: 5, max: 9 }
+        };
+        let timeLimit = {
+            'easy': 60,
+            'medium': 45,
+            'hard': 30
+        };
+        let patterns = [];
+        let revealedCells = 0;
+        let gameActive = false;
+        let score = 0;
+        let level = 1;
+        let remainingTime = 0;
+        let timerInterval = null;
+        
+        // DOM Elements
+        const gameBoard = document.getElementById('game-board');
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        const timeElement = document.getElementById('time');
+        const startModal = document.getElementById('start-modal');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const levelCompleteModal = document.getElementById('level-complete-modal');
+        const helpModal = document.getElementById('help-modal');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const newGameBtn = document.getElementById('new-game-btn');
+        const helpBtn = document.getElementById('help-btn');
+        const closeHelpBtn = document.getElementById('close-help-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const nextLevelBtn = document.getElementById('next-level-btn');
+        const finalScoreElement = document.getElementById('final-score');
+        const finalLevelElement = document.getElementById('final-level');
+        const levelScoreElement = document.getElementById('level-score');
+        const nextLevelElement = document.getElementById('next-level');
+        const timerProgress = document.getElementById('timer-progress');
+        const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+        const patternIndicators = document.getElementById('pattern-indicators');
+        
+        // Event Listeners
+        startGameBtn.addEventListener('click', startGame);
+        newGameBtn.addEventListener('click', newGame);
+        helpBtn.addEventListener('click', showHelp);
+        closeHelpBtn.addEventListener('click', closeHelp);
+        restartBtn.addEventListener('click', newGame);
+        nextLevelBtn.addEventListener('click', startNextLevel);
+        
+        difficultyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                difficultyButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                difficulty = btn.dataset.difficulty;
+                if (gameActive) {
+                    newGame();
+                }
+            });
+        });
+        
+        // Initialize game
+        showStartModal();
+        
+        /**
+         * Shows the start modal
+         */
+        function showStartModal() {
+            startModal.classList.add('active');
+        }
+        
+        /**
+         * Shows the help modal
+         */
+        function showHelp() {
+            helpModal.classList.add('active');
+        }
+        
+        /**
+         * Closes the help modal
+         */
+        function closeHelp() {
+            helpModal.classList.remove('active');
+        }
+        
+        /**
+         * Starts a new game
+         */
+        function startGame() {
+            startModal.classList.remove('active');
+            initGame();
+        }
+        
+        /**
+         * Resets the game to level 1
+         */
+        function newGame() {
+            gameOverModal.classList.remove('active');
+            level = 1;
+            score = 0;
+            updateStats();
+            initGame();
+        }
+        
+        /**
+         * Starts the next level
+         */
+        function startNextLevel() {
+            levelCompleteModal.classList.remove('active');
+            level++;
+            updateStats();
+            initGame();
+        }
+        
+        /**
+         * Shows the game over modal
+         */
+        function showGameOverModal() {
+            finalScoreElement.textContent = score;
+            finalLevelElement.textContent = level;
+            gameOverModal.classList.add('active');
+        }
+        
+        /**
+         * Shows the level complete modal
+         */
+        function showLevelCompleteModal() {
+            levelScoreElement.textContent = score;
+            nextLevelElement.textContent = level + 1;
+            levelCompleteModal.classList.add('active');
+        }
+        
+        /**
+         * Initializes a new game level
+         */
+        function initGame() {
+            // Stop any existing timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Clear game board
+            gameBoard.innerHTML = '';
+            
+            // Adjust game parameters based on level
+            numPatterns = Math.min(3 + Math.floor(level / 2), 8);
+            
+            // Initialize game state
+            gameActive = true;
+            revealedCells = 0;
+            board = [];
+            patterns = [];
+            remainingTime = timeLimit[difficulty];
+            
+            // Create empty board
+            for (let i = 0; i < boardSize; i++) {
+                board[i] = [];
+                for (let j = 0; j < boardSize; j++) {
+                    board[i][j] = {
+                        hasPattern: false,
+                        revealed: false,
+                        flagged: false,
+                        patternId: null,
+                        adjacentPatterns: 0
+                    };
+                }
+            }
+            
+            // Generate patterns
+            generatePatterns();
+            
+            // Calculate adjacent pattern counts
+            calculateAdjacentPatterns();
+            
+            // Render board
+            renderBoard();
+            
+            // Update stats
+            updateStats();
+            
+            // Update pattern indicators
+            updatePatternIndicators();
+            
+            // Start timer
+            startTimer();
+        }
+        
+        /**
+         * Generates random patterns on the board
+         */
+        function generatePatterns() {
+            const patternTypes = ['a', 'b', 'c', 'd'];
+            
+            for (let i = 0; i < numPatterns; i++) {
+                const patternType = patternTypes[i % patternTypes.length];
+                const patternSize = Math.floor(
+                    Math.random() * (patternSizes[difficulty].max - patternSizes[difficulty].min + 1) + 
+                    patternSizes[difficulty].min
+                );
+                
+                // Find a valid starting cell
+                let startRow, startCol;
+                let validStart = false;
+                
+                while (!validStart) {
+                    startRow = Math.floor(Math.random() * boardSize);
+                    startCol = Math.floor(Math.random() * boardSize);
+                    
+                    if (!board[startRow][startCol].hasPattern) {
+                        validStart = true;
+                        
+                        // Check if there's enough space for the pattern
+                        const visited = new Set();
+                        const queue = [[startRow, startCol]];
+                        visited.add(`${startRow},${startCol}`);
+                        
+                        while (queue.length > 0 && visited.size < patternSize * 2) {
+                            const [r, c] = queue.shift();
+                            
+                            // Check all adjacent cells
+                            for (let dr = -1; dr <= 1; dr++) {
+                                for (let dc = -1; dc <= 1; dc++) {
+                                    if (dr === 0 && dc === 0) continue;
+                                    
+                                    const nr = r + dr;
+                                    const nc = c + dc;
+                                    
+                                    if (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize && 
+                                        !visited.has(`${nr},${nc}`)) {
+                                        visited.add(`${nr},${nc}`);
+                                        queue.push([nr, nc]);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (visited.size < patternSize * 2) {
+                            validStart = false;
+                        }
+                    }
+                }
+                
+                // Create the pattern
+                const pattern = {
+                    id: i,
+                    type: patternType,
+                    cells: [],
+                    completed: false
+                };
+                
+                // Add the starting cell to the pattern
+                board[startRow][startCol].hasPattern = true;
+                board[startRow][startCol].patternId = i;
+                pattern.cells.push([startRow, startCol]);
+                
+                // Grow the pattern
+                const potentialCells = [];
+                
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        
+                        const nr = startRow + dr;
+                        const nc = startCol + dc;
+                        
+                        if (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize && 
+                            !board[nr][nc].hasPattern) {
+                            potentialCells.push([nr, nc]);
+                        }
+                    }
+                }
+                
+                while (pattern.cells.length < patternSize && potentialCells.length > 0) {
+                    // Select a random potential cell
+                    const index = Math.floor(Math.random() * potentialCells.length);
+                    const [r, c] = potentialCells[index];
+                    
+                    // Add it to the pattern
+                    board[r][c].hasPattern = true;
+                    board[r][c].patternId = i;
+                    pattern.cells.push([r, c]);
+                    
+                    // Remove it from potential cells
+                    potentialCells.splice(index, 1);
+                    
+                    // Add its neighbors to potential cells
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            if (dr === 0 && dc === 0) continue;
+                            
+                            const nr = r + dr;
+                            const nc = c + dc;
+                            
+                            if (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize && 
+                                !board[nr][nc].hasPattern && 
+                                !potentialCells.some(cell => cell[0] === nr && cell[1] === nc)) {
+                                // Check if the cell is adjacent to any existing pattern cells
+                                let isAdjacent = false;
+                                for (const [pr, pc] of pattern.cells) {
+                                    if (Math.abs(pr - nr) <= 1 && Math.abs(pc - nc) <= 1) {
+                                        isAdjacent = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (isAdjacent) {
+                                    potentialCells.push([nr, nc]);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                patterns.push(pattern);
+            }
+        }
+        
+        /**
+         * Calculates how many pattern cells are adjacent to each non-pattern cell
+         */
+        function calculateAdjacentPatterns() {
+            for (let r = 0; r < boardSize; r++) {
+                for (let c = 0; c < boardSize; c++) {
+                    if (!board[r][c].hasPattern) {
+                        // Count adjacent pattern cells
+                        let count = 0;
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                if (dr === 0 && dc === 0) continue;
+                                
+                                const nr = r + dr;
+                                const nc = c + dc;
+                                
+                                if (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize && 
+                                    board[nr][nc].hasPattern) {
+                                    count++;
+                                }
+                            }
+                        }
+                        board[r][c].adjacentPatterns = count;
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Renders the initial game board
+         */
+        function renderBoard() {
+            gameBoard.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+            
+            for (let r = 0; r < boardSize; r++) {
+                for (let c = 0; c < boardSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    
+                    cell.addEventListener('click', () => {
+                        if (gameActive && !board[r][c].revealed && !board[r][c].flagged) {
+                            revealCell(r, c);
+                        }
+                    });
+                    
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        if (gameActive && !board[r][c].revealed) {
+                            toggleFlag(r, c);
+                        }
+                    });
+                    
+                    gameBoard.appendChild(cell);
+                }
+            }
+        }
+        
+        /**
+         * Updates the game board display
+         */
+        function updateBoard() {
+            const cells = gameBoard.querySelectorAll('.cell');
+            
+            for (let r = 0; r < boardSize; r++) {
+                for (let c = 0; c < boardSize; c++) {
+                    const index = r * boardSize + c;
+                    const cell = cells[index];
+                    const cellData = board[r][c];
+                    
+                    // Reset classes
+                    cell.className = 'cell';
+                    cell.textContent = '';
+                    
+                    if (cellData.revealed) {
+                        cell.classList.add('revealed');
+                        
+                        if (cellData.hasPattern) {
+                            const pattern = patterns[cellData.patternId];
+                            cell.classList.add(`pattern-${pattern.type}`);
+                        } else if (cellData.adjacentPatterns > 0) {
+                            cell.textContent = cellData.adjacentPatterns;
+                        }
+                    }
+                    
+                    if (cellData.flagged) {
+                        cell.classList.add('flagged');
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Reveals a cell on the board
+         * /**
+ * Reveals a cell on the board
+ * @param {number} r - Row index
+ * @param {number} c - Column index
+ */
+function revealCell(r, c) {
+    if (board[r][c].revealed || board[r][c].flagged) return;
+
+    board[r][c].revealed = true;
+    revealedCells++;
+
+    const cell = gameBoard.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+    cell.classList.add('revealed');
+
+    if (board[r][c].hasPattern) {
+        const patternId = board[r][c].patternId;
+        const pattern = patterns[patternId];
+
+        cell.classList.add(`pattern-${pattern.type}`);
+        cell.classList.add('pulse');
+
+        // Check if pattern is completed
+        let patternCompleted = true;
+        for (const [pr, pc] of pattern.cells) {
+            if (!board[pr][pc].revealed) {
+                patternCompleted = false;
+                break;
+            }
+        }
+
+        if (patternCompleted && !pattern.completed) {
+            completePattern(patternId);
+        }
+    } else {
+        // Show adjacent pattern count
+        if (board[r][c].adjacentPatterns > 0) {
+            cell.textContent = board[r][c].adjacentPatterns;
+        } else {
+            // Auto-reveal adjacent cells with no adjacent patterns
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+
+                    const nr = r + dr;
+                    const nc = c + dc;
+
+                    if (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize) {
+                        revealCell(nr, nc);
+                    }
+                }
+            }
+        }
+    }
+
+    updateBoard();
+    checkWinCondition();
+}
+
+/**
+ * Toggles the flag on a cell
+ * @param {number} r - Row index
+ * @param {number} c - Column index
+ */
+function toggleFlag(r, c) {
+    if (board[r][c].revealed) return;
+
+    board[r][c].flagged = !board[r][c].flagged;
+    updateBoard();
+}
+
+/**
+ * Completes a pattern and updates the game state
+ * @param {number} patternId - The ID of the pattern to complete
+ */
+function completePattern(patternId) {
+    const pattern = patterns[patternId];
+    pattern.completed = true;
+
+    // Add score based on pattern size and difficulty
+    const basePoints = pattern.cells.length * 10;
+    const difficultyMultiplier = {
+        'easy': 1,
+        'medium': 1.5,
+        'hard': 2
+    };
+    const points = Math.floor(basePoints * difficultyMultiplier[difficulty]);
+    score += points;
+
+    // Animate completed pattern cells
+    for (const [r, c] of pattern.cells) {
+        const cell = gameBoard.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+        cell.classList.add('completed');
+    }
+
+    updateStats();
+    updatePatternIndicators();
+    checkWinCondition();
+}
+
+/**
+ * Starts the game timer
+ */
+function startTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+
+    timerInterval = setInterval(() => {
+        if (!gameActive) return;
+
+        remainingTime -= 0.1;
+        timeElement.textContent = Math.ceil(remainingTime);
+
+        // Update timer progress bar
+        const progressPercent = (remainingTime / timeLimit[difficulty]) * 100;
+        timerProgress.style.transform = `scaleX(${progressPercent / 100})`;
+
+        if (remainingTime <= 0) {
+            clearInterval(timerInterval);
+            gameActive = false;
+            spreadPatterns();
+            showGameOverModal();
+        }
+    }, 100);
+}
+
+/**
+ * Spreads incomplete patterns across the board when time runs out
+ */
+function spreadPatterns() {
+    for (const pattern of patterns) {
+        if (!pattern.completed) {
+            // Spread the pattern to adjacent cells
+            const newCells = [];
+            for (const [r, c] of pattern.cells) {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+
+                        const nr = r + dr;
+                        const nc = c + dc;
+
+                        if (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize && 
+                            !board[nr][nc].hasPattern) {
+                            board[nr][nc].hasPattern = true;
+                            board[nr][nc].patternId = pattern.id;
+                            board[nr][nc].revealed = true;
+                            newCells.push([nr, nc]);
+                        }
+                    }
+                }
+            }
+            pattern.cells.push(...newCells);
+        }
+    }
+    updateBoard();
+}
+
+/**
+ * Updates the game stats display
+ */
+function updateStats() {
+    scoreElement.textContent = score;
+    levelElement.textContent = level;
+    timeElement.textContent = Math.ceil(remainingTime);
+}
+
+/**
+ * Updates the pattern indicators
+ */
+function updatePatternIndicators() {
+    patternIndicators.innerHTML = '';
+
+    patterns.forEach(pattern => {
+        const indicator = document.createElement('div');
+        indicator.className = `pattern-indicator pattern-${pattern.type}-indicator`;
+        if (pattern.completed) {
+            indicator.classList.add('completed');
+        }
+        patternIndicators.appendChild(indicator);
+    });
+}
+
+/**
+ * Checks if the player has won the level
+ */
+function checkWinCondition() {
+    const allPatternsCompleted = patterns.every(pattern => pattern.completed);
+
+    if (allPatternsCompleted) {
+        clearInterval(timerInterval);
+        gameActive = false;
+
+        // Add time bonus
+        const timeBonus = Math.floor(remainingTime) * 5;
+        score += timeBonus;
+
+        updateStats();
+        showLevelCompleteModal();
+    }
+}
+
+/**
+ * Handles window resize to adjust board size
+ */
+window.addEventListener('resize', () => {
+    const gameContainer = document.querySelector('.game-container');
+    const width = gameContainer.clientWidth;
+    gameBoard.style.width = `${width}px`;
+});
+
+// Initial board size adjustment
+window.dispatchEvent(new Event('resize'));
+    </script>
+</body>
+</html>

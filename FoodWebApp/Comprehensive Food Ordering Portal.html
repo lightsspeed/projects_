@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodHub - Order Food Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#FF4B4B',
+secondary: '#FF8C42'
+},
+borderRadius: {
+'none': '0px',
+'sm': '8px',
+DEFAULT: '12px',
+'md': '16px',
+'lg': '20px',
+'xl': '24px',
+'2xl': '28px',
+'3xl': '32px',
+'full': '9999px',
+'button': '12px'
+}
+}
+}
+}
+</script>
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.location-dropdown {
+display: none;
+position: absolute;
+top: 100%;
+left: 0;
+width: 100%;
+background: #1a1a1a;
+border: 1px solid #333;
+border-radius: 12px;
+z-index: 50;
+}
+.location-button:focus + .location-dropdown,
+.location-dropdown:hover {
+display: block;
+}
+</style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+<header class="fixed top-0 left-0 right-0 bg-gray-900 border-b border-gray-800 z-50">
+<div class="container mx-auto px-4">
+<div class="flex items-center justify-between h-16">
+<a href="#" class="font-['Pacifico'] text-2xl text-primary">logo</a>
+<div class="relative flex-1 max-w-md mx-8">
+<div class="relative">
+<button class="location-button flex items-center space-x-2 bg-gray-800 px-4 py-2 rounded-button text-sm">
+<i class="ri-map-pin-line text-primary"></i>
+<span>Mumbai, MH</span>
+<i class="ri-arrow-down-s-line"></i>
+</button>
+<div class="location-dropdown p-2">
+<div class="p-2 hover:bg-gray-800 rounded cursor-pointer">Delhi, DL</div>
+<div class="p-2 hover:bg-gray-800 rounded cursor-pointer">Bangalore, KA</div>
+<div class="p-2 hover:bg-gray-800 rounded cursor-pointer">Chennai, TN</div>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-6">
+<div class="relative cursor-pointer">
+<i class="ri-shopping-cart-2-line text-xl"></i>
+<span class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+</div>
+<button class="flex items-center space-x-2 bg-gray-800 px-4 py-2 rounded-button text-sm hover:bg-gray-700">
+<i class="ri-user-line"></i>
+<span>Sign In</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-16">
+<section class="relative h-[600px] flex items-center overflow-hidden">
+<div class="absolute inset-0">
+<img src="https://public.readdy.ai/ai/img_res/8f4eea187dc908fa94fa8fc729e3de8a.jpg"
+class="w-full h-full object-cover object-center" alt="Hero">
+<div class="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent"></div>
+</div>
+<div class="container mx-auto px-4 relative">
+<div class="max-w-2xl">
+<h1 class="text-5xl font-bold mb-6">Discover the Best Food & Drinks in Your City</h1>
+<div class="flex">
+<div class="flex-1 relative">
+<input type="text"
+placeholder="Search for restaurant, cuisine or a dish"
+class="w-full px-4 py-3 pr-10 bg-gray-800 rounded-l-button text-gray-100 border-none focus:outline-none focus:ring-2 focus:ring-primary">
+<i class="ri-search-line absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+</div>
+<button class="px-6 py-3 bg-primary text-white rounded-r-button hover:bg-opacity-90 whitespace-nowrap">
+Search
+</button>
+</div>
+</div>
+</div>
+</section>
+<section class="py-12 bg-gray-900">
+<div class="container mx-auto px-4">
+<h2 class="text-2xl font-bold mb-8">Popular Cuisines</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+<div class="bg-gray-800 rounded p-4 text-center cursor-pointer hover:bg-gray-700">
+<div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+<i class="ri-restaurant-line text-2xl text-primary"></i>
+</div>
+<h3>Italian</h3>
+</div>
+<div class="bg-gray-800 rounded p-4 text-center cursor-pointer hover:bg-gray-700">
+<div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+<i class="ri-restaurant-2-line text-2xl text-primary"></i>
+</div>
+<h3>Chinese</h3>
+</div>
+<div class="bg-gray-800 rounded p-4 text-center cursor-pointer hover:bg-gray-700">
+<div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+<i class="ri-restaurant-line text-2xl text-primary"></i>
+</div>
+<h3>Japanese</h3>
+</div>
+<div class="bg-gray-800 rounded p-4 text-center cursor-pointer hover:bg-gray-700">
+<div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+<i class="ri-restaurant-2-line text-2xl text-primary"></i>
+</div>
+<h3>Mexican</h3>
+</div>
+<div class="bg-gray-800 rounded p-4 text-center cursor-pointer hover:bg-gray-700">
+<div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+<i class="ri-restaurant-line text-2xl text-primary"></i>
+</div>
+<h3>Indian</h3>
+</div>
+<div class="bg-gray-800 rounded p-4 text-center cursor-pointer hover:bg-gray-700">
+<div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+<i class="ri-restaurant-2-line text-2xl text-primary"></i>
+</div>
+<h3>Thai</h3>
+</div>
+</div>
+</div>
+</section>
+<section class="py-12 bg-gray-900">
+<div class="container mx-auto px-4">
+<div class="flex justify-between items-center mb-8">
+<h2 class="text-2xl font-bold">Popular Restaurants</h2>
+<button class="text-primary hover:text-primary-dark">View All</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="bg-gray-800 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+<img src="https://public.readdy.ai/ai/img_res/cc9cb77fbba60e3ae8120ed774d0b068.jpg"
+class="w-full h-48 object-cover" alt="Restaurant">
+<div class="p-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-lg font-semibold">La Piazza</h3>
+<span class="bg-green-600 text-white text-xs px-2 py-1 rounded">4.8 ★</span>
+</div>
+<p class="text-gray-400 text-sm mb-2">Italian • ₹₹</p>
+<div class="flex items-center text-sm text-gray-400">
+<i class="ri-time-line mr-1"></i>
+<span>30-40 min</span>
+<span class="mx-2">•</span>
+<span>₹99 delivery</span>
+</div>
+</div>
+</div>
+<div class="bg-gray-800 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+<img src="https://public.readdy.ai/ai/img_res/a7e27a81dd61b1aa85aec3ea21a3c3fe.jpg"
+class="w-full h-48 object-cover" alt="Restaurant">
+<div class="p-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-lg font-semibold">Sakura Sushi</h3>
+<span class="bg-green-600 text-white text-xs px-2 py-1 rounded">4.6 ★</span>
+</div>
+<p class="text-gray-400 text-sm mb-2">Japanese • ₹₹₹</p>
+<div class="flex items-center text-sm text-gray-400">
+<i class="ri-time-line mr-1"></i>
+<span>40-50 min</span>
+<span class="mx-2">•</span>
+<span>₹79 delivery</span>
+</div>
+</div>
+</div>
+<div class="bg-gray-800 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+<img src="https://public.readdy.ai/ai/img_res/d981e23d949055d215b5dc4050bba474.jpg"
+class="w-full h-48 object-cover" alt="Restaurant">
+<div class="p-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-lg font-semibold">Burger House</h3>
+<span class="bg-green-600 text-white text-xs px-2 py-1 rounded">4.5 ★</span>
+</div>
+<p class="text-gray-400 text-sm mb-2">American • ₹₹</p>
+<div class="flex items-center text-sm text-gray-400">
+<i class="ri-time-line mr-1"></i>
+<span>20-30 min</span>
+<span class="mx-2">•</span>
+<span>₹129 delivery</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-12 bg-gray-900">
+<div class="container mx-auto px-4">
+<h2 class="text-2xl font-bold mb-8">Special Offers</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="bg-gradient-to-r from-primary to-secondary rounded-lg p-6">
+<h3 class="text-xl font-bold mb-2">50% OFF</h3>
+<p class="mb-4">On your first order</p>
+<button class="bg-white text-primary px-4 py-2 rounded-button hover:bg-gray-100">Order Now</button>
+</div>
+<div class="bg-gradient-to-r from-blue-600 to-blue-400 rounded-lg p-6">
+<h3 class="text-xl font-bold mb-2">Free Delivery</h3>
+<p class="mb-4">On orders above ₹999</p>
+<button class="bg-white text-blue-600 px-4 py-2 rounded-button hover:bg-gray-100">Order Now</button>
+</div>
+<div class="bg-gradient-to-r from-green-600 to-green-400 rounded-lg p-6">
+<h3 class="text-xl font-bold mb-2">20% OFF</h3>
+<p class="mb-4">On selected restaurants</p>
+<button class="bg-white text-green-600 px-4 py-2 rounded-button hover:bg-gray-100">Order Now</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-gray-900 border-t border-gray-800 py-12">
+<div class="container mx-auto px-4">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<div>
+<h3 class="font-['Pacifico'] text-2xl text-primary mb-4">logo</h3>
+<p class="text-gray-400">Discover the best food & drinks in your city</p>
+</div>
+<div>
+<h4 class="text-lg font-semibold mb-4">Company</h4>
+<ul class="space-y-2 text-gray-400">
+<li><a href="#" class="hover:text-white">About Us</a></li>
+<li><a href="#" class="hover:text-white">Team</a></li>
+<li><a href="#" class="hover:text-white">Careers</a></li>
+<li><a href="#" class="hover:text-white">Blog</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-lg font-semibold mb-4">Contact</h4>
+<ul class="space-y-2 text-gray-400">
+<li><a href="#" class="hover:text-white">Help & Support</a></li>
+<li><a href="#" class="hover:text-white">Partner with us</a></li>
+<li><a href="#" class="hover:text-white">Ride with us</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-lg font-semibold mb-4">Legal</h4>
+<ul class="space-y-2 text-gray-400">
+<li><a href="#" class="hover:text-white">Terms & Conditions</a></li>
+<li><a href="#" class="hover:text-white">Privacy Policy</a></li>
+<li><a href="#" class="hover:text-white">Cookie Policy</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+<p class="text-gray-400">© 2025 FoodHub. All rights reserved.</p>
+<div class="flex space-x-4 mt-4 md:mt-0">
+<a href="#" class="text-gray-400 hover:text-white">
+<i class="ri-facebook-fill text-xl"></i>
+</a>
+<a href="#" class="text-gray-400 hover:text-white">
+<i class="ri-twitter-fill text-xl"></i>
+</a>
+<a href="#" class="text-gray-400 hover:text-white">
+<i class="ri-instagram-fill text-xl"></i>
+</a>
+</div>
+</div>
+</div>
+</footer>
+</body>
+</html>
