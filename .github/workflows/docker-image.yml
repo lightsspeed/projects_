@@ -26,7 +26,7 @@ jobs:
       - name: Build Docker Image
         run: docker build -t $IMAGE_NAME -f Games/pixelpainter/Dockerfile Games/pixelpainter/
 
-      - name: Push Image to Docker Hub
-        run: docker push $IMAGE_NAME
-
-     
+      - name: Run Docker Container
+        run: |
+          docker run -d --name pixelpainter-test -p 80:80 $IMAGE_NAME
+          sleep 5  # Give it time to start
