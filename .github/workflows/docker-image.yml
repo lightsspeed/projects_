@@ -26,24 +26,7 @@ jobs:
       - name: Build Docker Image
         run: docker build -t $IMAGE_NAME -f Games/pixelpainter/Dockerfile Games/pixelpainter/
 
-      - name: Test Docker Image (Optional)
-        run: |
-          docker run --rm -p 80:80 $IMAGE_NAME &
-          sleep 5
-          curl -f http://localhost || exit 1
-          docker stop $(docker ps -q)
-
       - name: Push Image to Docker Hub
         run: docker push $IMAGE_NAME
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pixelpainter:${GITHUB_SHA::8}
-            sudo docker stop pixelpainter-container || true
-            sudo docker rm pixelpainter-container || true
-            sudo docker run -d --name pixelpainter-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/pixelpainter:${GITHUB_SHA::8}
+     
