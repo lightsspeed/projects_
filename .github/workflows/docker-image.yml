@@ -18,14 +18,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      - name: Set Image Name and Tag
-        run: echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/pixelpainter:${GITHUB_SHA::8}" >> $GITHUB_ENV
+      - name: Set Image Tag
+        id: set-tag
+        run: echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-8)" >> $GITHUB_OUTPUT
       
       - name: Build Docker Image
-        run: docker build -t $IMAGE_NAME -f Games/pixelpainter/Dockerfile Games/pixelpainter/
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/pixelpainter:${{ steps.set-tag.outputs.IMAGE_TAG }} -f Games/pixelpainter/Dockerfile Games/pixelpainter/
       
       - name: Push Image to Docker Hub
-        run: docker push $IMAGE_NAME
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/pixelpainter:${{ steps.set-tag.outputs.IMAGE_TAG }}
       
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -33,9 +34,19 @@ jobs:
           host: ${{ secrets.EC2_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          envs: IMAGE_TAG=${{ steps.set-tag.outputs.IMAGE_TAG }}
           script: |
-            export IMAGE_TAG="${GITHUB_SHA::8}"
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pixelpainter:${GITHUB_SHA::8}
+            DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/pixelpainter:${IMAGE_TAG}"
+            echo "Using Docker image: $DOCKER_IMAGE"
+            
+            sudo docker pull $DOCKER_IMAGE
+            
+            echo "Stopping and removing existing container (if any)"
             sudo docker stop pixelpainter-container || true
             sudo docker rm pixelpainter-container || true
-            sudo docker run -d --name pixelpainter-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/pixelpainter:${GITHUB_SHA::8}
+            
+            echo "Starting new container"
+            sudo docker run -d --name pixelpainter-container -p 80:80 $DOCKER_IMAGE
+            
+            echo "Container started. Verifying container is running:"
+            sudo docker ps | grep pixelpainter-container
