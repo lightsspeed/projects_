@@ -18,15 +18,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      - name: Set Image Tag
-        id: set-tag
-        run: echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-8)" >> $GITHUB_OUTPUT
-      
-      - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/pixelpainter:${{ steps.set-tag.outputs.IMAGE_TAG }} -f Games/pixelpainter/Dockerfile Games/pixelpainter/
-      
-      - name: Push Image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/pixelpainter:${{ steps.set-tag.outputs.IMAGE_TAG }}
+      # Create a hardcoded tag instead of using SHA for simplicity
+      - name: Build and Push Docker Image
+        run: |
+          export IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/pixelpainter:latest"
+          docker build -t $IMAGE_NAME -f Games/pixelpainter/Dockerfile Games/pixelpainter/
+          docker push $IMAGE_NAME
       
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -34,19 +31,13 @@ jobs:
           host: ${{ secrets.EC2_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          envs: IMAGE_TAG=${{ steps.set-tag.outputs.IMAGE_TAG }}
           script: |
-            DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/pixelpainter:${IMAGE_TAG}"
-            echo "Using Docker image: $DOCKER_IMAGE"
+            # Use a hardcoded image name to eliminate variable substitution issues
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pixelpainter:latest
             
-            sudo docker pull $DOCKER_IMAGE
-            
-            echo "Stopping and removing existing container (if any)"
+            # Stop and remove container if it exists
             sudo docker stop pixelpainter-container || true
             sudo docker rm pixelpainter-container || true
             
-            echo "Starting new container"
-            sudo docker run -d --name pixelpainter-container -p 80:80 $DOCKER_IMAGE
-            
-            echo "Container started. Verifying container is running:"
-            sudo docker ps | grep pixelpainter-container
+            # Run the new container with explicit image name
+            sudo docker run -d --name pixelpainter-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/pixelpainter:latest
