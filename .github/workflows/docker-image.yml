@@ -1,35 +1,43 @@
-name: Build, Run & Push Docker Image
-
+name: Build, Push & Deploy Docker Image
 on:
   push:
     branches:
-      - main  # Runs when code is pushed to the main branch
-  workflow_dispatch:  # Allows manual triggering
-
+      - main
+  workflow_dispatch:
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
+      
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Set Image Name and Tag
-        run: echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/todoapp:1.0.1" >> $GITHUB_ENV
-
-      - name: Build Docker Image
-        run: docker build -t $IMAGE_NAME -f todoApp/Dockerfile todoApp/
-
-      - name: Run Docker Container
-        run: docker run -d --name my-app-container -p 8080:80 $IMAGE_NAME
-
-      - name: Verify Running Container
-        run: docker ps -a
-
-      - name: Push Image to Docker Hub
-        run: docker push $IMAGE_NAME
-
-     
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      # Create a hardcoded tag instead of using SHA for simplicity
+      - name: Build and Push Docker Image
+        run: |
+          export IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/pixelpainter:latest"
+          docker build -t $IMAGE_NAME -f Games/pixelpainter/Dockerfile Games/pixelpainter/
+          docker push $IMAGE_NAME
+      
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Use a hardcoded image name to eliminate variable substitution issues
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pixelpainter:latest
+            
+            # Stop and remove container if it exists
+            sudo docker stop pixelpainter-container || true
+            sudo docker rm pixelpainter-container || true
+            
+            # Run the new container with explicit image name
+            sudo docker run -d --name pixelpainter-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/pixelpainter:latest
